@@ -58,6 +58,7 @@ func Post_blog(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(reqBody, &dumdum)
 	if err != nil {
 		log.Print("Error here in unmarshalling to map[string]interface{}")
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
 	// UNMARSHAL() DOES NOT FORMAT JSON
@@ -71,6 +72,7 @@ func Post_blog(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(reqBody, &blog)
 	if err != nil {
 		log.Println("error unmarshalling to struct", err)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
 
 	// UNFORMATTED JSON
@@ -99,6 +101,12 @@ func Put_blog(w http.ResponseWriter, r *http.Request) {
 	err := json.Unmarshal(payload, &userData)
 	if err != nil {
 		log.Println("Unmarshal error")
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
+	if err := validate.Struct(userData); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	res := db.Model(&users.User{}).Where("user_uuid = ?", userData.User_Uuid).Updates(userData)
